@@ -98,8 +98,7 @@ function boing(){ if(!soundOn) return; try{ const ctx=new (window.AudioContext||
 function ding(){ if(!soundOn) return; try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); [880,1320].forEach((f,i)=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(.15,ctx.currentTime+i*.12); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.12+.4); o.connect(g); g.connect(ctx.destination); o.start(ctx.currentTime+i*.12); o.stop(ctx.currentTime+i*.12+.4);});}catch(e){} }
 function sillyLine(){ const s=SILLY[Math.floor(Math.random()*SILLY.length)]; return s[0]+" "+s[1]; }
 function updateHeader(){
-  document.getElementById('num').textContent=idx+1;
-  document.getElementById('stars').innerHTML='⭐ '+stars+' &nbsp;•&nbsp; Round '+(idx+1)+' of '+deckLen();
+  document.getElementById('stars').innerHTML='⭐ '+stars+' &nbsp;•&nbsp; Round <span id="num">'+(idx+1)+'</span> of '+deckLen();
   document.getElementById('fill').style.width=(idx/deckLen()*100)+'%';
 }
 function showRound(){
