@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Follow It! — Commands, Objects &amp; Body Parts</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#FFF7E6,#EDE9FE);color:#1F2937;min-height:100vh;text-align:center}
+header{padding:14px 10px 4px}
+h1{margin:0;font-size:34px;color:#7C3AED}
+.sub{font-size:17px;color:#6B7280;margin:4px 0 0}
+#stars{font-size:26px;margin:8px 0 0}
+#bar{height:14px;background:#fff;border:2px solid #C4B5FD;border-radius:99px;margin:10px 18px 0;overflow:hidden}
+#fill{height:100%;width:0%;background:linear-gradient(90deg,#A78BFA,#FBBF24);transition:width .4s}
+#modeRow{display:flex;gap:10px;justify-content:center;margin:14px 12px 0;flex-wrap:wrap}
+.modeBtn{flex:1;min-width:110px;max-width:220px;padding:13px 6px;font-size:18px;font-weight:800;border-radius:16px;border:3px solid #C4B5FD;background:#fff;color:#7C3AED;cursor:pointer}
+.modeBtn.on{background:#8B5CF6;color:#fff;border-color:#6D28D9}
+#card{background:#fff;border:4px solid #C4B5FD;border-radius:26px;margin:16px 14px;padding:18px 14px 22px;min-height:520px;box-shadow:0 8px 24px rgba(124,58,237,.15)}
+#picWrap{font-size:150px;line-height:1.1;min-height:190px;display:flex;align-items:center;justify-content:center}
+#revealBtn{font-size:22px;font-weight:800;padding:14px 26px;border-radius:99px;border:none;background:#FBBF24;color:#78350F;cursor:pointer;margin-top:6px}
+#prompt{font-size:28px;font-weight:800;margin:14px 0 6px}
+#cmdText{font-size:34px;font-weight:900;color:#7C3AED;margin:10px 0;min-height:44px}
+#choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0 4px}
+.choice{font-size:64px;padding:16px 20px;border-radius:20px;border:3px solid #93C5FD;background:#EFF6FF;cursor:pointer;min-width:110px;min-height:110px}
+.choice.correct{background:#BBF7D0;border-color:#16A34A}
+.choice.wrong{background:#FECACA;border-color:#DC2626}
+#answer{font-size:30px;font-weight:900;color:#7C3AED;margin:12px 0 4px;min-height:38px}
+#sayHint{font-size:18px;color:#6B7280}
+.bigBtn{font-size:22px;font-weight:800;padding:16px 24px;border-radius:99px;border:none;cursor:pointer;margin:8px 6px 0}
+#didIt{background:#22C55E;color:#fff}
+#hearIt{background:#3B82F6;color:#fff}
+#nextBtn{background:#8B5CF6;color:#fff;display:none}
+#break{font-size:24px;font-weight:800;color:#7C3AED;margin:10px 0}
+#controls{display:flex;gap:10px;justify-content:center;margin:0 14px 18px;flex-wrap:wrap}
+.smallBtn{font-size:17px;font-weight:700;padding:12px 16px;border-radius:14px;border:2px solid #D1D5DB;background:#fff;cursor:pointer}
+#end{font-size:24px;font-weight:800;color:#7C3AED}
+#confetti{font-size:44px}
+</style>
+</head>
+<body>
+<header><h1>🎯 Follow It!</h1><p class="sub">Follow commands • Show me things • Body parts — play, move, earn stars!</p><div id="stars">⭐ 0 &nbsp;•&nbsp; Round <span id="num">1</span> of 36</div><div id="bar"><div id="fill"></div></div></header>
+<div id="modeRow">
+<button class="modeBtn on" id="followMode">🎧 Follow It!</button>
+<button class="modeBtn" id="showMode">👀 Show Me!</button>
+<button class="modeBtn" id="bodyMode">🧍 Body Parts!</button>
+</div>
+<div id="card">
+<div id="picWrap">🎁</div>
+<button id="revealBtn">Open the Mystery Box! 🎁</button>
+<div id="prompt">What's hiding in the box?</div>
+<div id="cmdText"></div>
+<div id="choices" style="display:none"></div>
+<div id="answer"></div>
+<div id="sayHint"></div>
+<div id="break"></div>
+<button class="bigBtn" id="hearIt" style="display:none">🔊 Hear It</button>
+<button class="bigBtn" id="didIt" style="display:none">⭐ I did it!</button>
+<button class="bigBtn" id="nextBtn">Next! ➡️</button>
+</div>
+<div id="controls">
+<button class="smallBtn" id="shuffleBtn">🔀 Shuffle</button>
+<button class="smallBtn" id="restartBtn">↩️ Play Again</button>
+<button class="smallBtn" id="soundBtn">🔊 Sound: On</button>
+</div>
+<div id="end"></div>
+<script>
+// ---------- data ----------
+const COMMANDS=[
+["👏","Clap your hands!"],["👃","Touch your nose!"],["🐰","Jump up high!"],["👢","Stomp your feet!"],["👋","Wave hello!"],["🧑","Touch your head!"],["🚪","Point to the door!"],["✋","Give a high five!"],["👂","Touch your ears!"],["🖐️","Wiggle your fingers!"],["🦶","Hop on one foot!"],["🌀","Spin around!"],["👣","Touch your toes!"],["👄","Open your mouth wide!"],["👀","Close your eyes!"],["🙌","Shake your hands!"],["🫄","Pat your tummy!"],["🥁","March in place!"],["🧎","Touch your knees!"],["😘","Blow a kiss!"],["🤷","Touch your shoulders!"],["🧍","Stand up tall!"],["🪑","Sit down!"],["💇","Touch your hair!"],["🪟","Point to the window!"],["👏","Clap 3 times!"],["🧔","Touch your chin!"],["👃","Wiggle your nose!"],["🙆","Stretch up high!"],["🦾","Touch your elbows!"],["👟","Point to your shoes!"],["👋","Wave bye-bye!"],["😊","Touch your cheeks!"],["🤗","Give yourself a hug!"],["🧍","Touch your back!"],["🫄","Rub your tummy!"]
+];
+// objects: [emoji, name, group]
+const OBJECTS=[
+["⚽","Ball","toy"],["🚗","Car","vehicle"],["🍎","Apple","food"],["🐶","Dog","animal"],["🐱","Cat","animal"],["📖","Book","home"],["🥤","Cup","home"],["👟","Shoe","clothes"],["🎩","Hat","clothes"],["🐟","Fish","animal"],["🌸","Flower","nature"],["☀️","Sun","nature"],["🌙","Moon","nature"],["🎂","Cake","food"],["🚚","Truck","vehicle"],["🚂","Train","vehicle"],["📱","Phone","home"],["🔑","Key","home"],["🍌","Banana","food"],["🍪","Cookie","food"],["🐦","Bird","animal"],["🌳","Tree","nature"],["🏠","House","home"],["⭐","Star","nature"],["🥛","Milk","food"],["🧃","Juice","food"],["🪑","Chair","home"],["🛏️","Bed","home"],["🎸","Guitar","toy"],["🍕","Pizza","food"],["🥚","Egg","food"],["🥄","Spoon","home"],["🪥","Toothbrush","home"],["🦋","Butterfly","animal"],["🥁","Drum","toy"],["🪁","Kite","toy"]
+];
+// body parts: [emoji, name]
+const PARTS=[
+["🧑","Head"],["💇","Hair"],["👀","Eyes"],["👃","Nose"],["👄","Mouth"],["👂","Ears"],["🦷","Teeth"],["👅","Tongue"],["✋","Hands"],["🖐️","Fingers"],["💪","Arms"],["🦵","Legs"],["🦶","Feet"],["👣","Toes"],["🧎","Knees"],["🦾","Elbows"],["🤷","Shoulders"],["🫄","Tummy"],["🧍","Back"],["🧔","Chin"],["😊","Cheeks"],["🧣","Neck"]
+];
+// body deck: touch commands + pick-the-part rounds, one of each per part
+const BODY=[];
+PARTS.forEach(p=>{ BODY.push({kind:"touch", emoji:p[0], name:p[1], text:"Touch your "+p[1].toLowerCase()+"!"}); });
+PARTS.forEach(p=>{ BODY.push({kind:"pick", emoji:p[0], name:p[1]}); });
+
+const SILLY=[["🦖","Do it like a DINOSAUR! ROAR!"],["🤖","Do it like a ROBOT! Beep boop!"],["🐭","Do it in a tiny MOUSE way!"],["🦁","Do it like a big LION! ROAR!"],["👶","Do it like a BABY! Goo goo!"],["🐸","Do it like a FROG! Ribbit!"],["🎤","Do it like a ROCK STAR!"],["🤫","Do it in a sneaky WHISPER way!"],["📣","Do it SUPER LOUD!"],["🐶","Do it like a PUPPY! Woof woof!"]];
+let mode="follow", stars=0, streak=0, soundOn=true, idx=0, answered=false;
+let decks={follow:shuffle([...COMMANDS.keys()]), show:shuffle([...OBJECTS.keys()]), body:shuffle([...BODY.keys()])};
+function deckLen(){ return mode==="follow"?COMMANDS.length : mode==="show"?OBJECTS.length : BODY.length; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const pic=document.getElementById('picWrap'), promptEl=document.getElementById('prompt'), cmdEl=document.getElementById('cmdText'), ans=document.getElementById('answer'), hint=document.getElementById('sayHint'), brk=document.getElementById('break');
+const revealBtn=document.getElementById('revealBtn'), hearBtn=document.getElementById('hearIt'), didBtn=document.getElementById('didIt'), nextBtn=document.getElementById('nextBtn'), choicesEl=document.getElementById('choices');
+function speak(t){ if(!soundOn) return; try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.rate=.85; speechSynthesis.speak(u);}catch(e){} }
+function boing(){ if(!soundOn) return; try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(600,ctx.currentTime); o.frequency.exponentialRampToValueAtTime(1200,ctx.currentTime+.15); g.gain.setValueAtTime(.2,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.3); o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+.3);}catch(e){} }
+function ding(){ if(!soundOn) return; try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); [880,1320].forEach((f,i)=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(.15,ctx.currentTime+i*.12); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.12+.4); o.connect(g); g.connect(ctx.destination); o.start(ctx.currentTime+i*.12); o.stop(ctx.currentTime+i*.12+.4);});}catch(e){} }
+function sillyLine(){ const s=SILLY[Math.floor(Math.random()*SILLY.length)]; return s[0]+" "+s[1]; }
+function updateHeader(){
+  document.getElementById('num').textContent=idx+1;
+  document.getElementById('stars').innerHTML='⭐ '+stars+' &nbsp;•&nbsp; Round '+(idx+1)+' of '+deckLen();
+  document.getElementById('fill').style.width=(idx/deckLen()*100)+'%';
+}
+function showRound(){
+  answered=false;
+  pic.textContent='🎁';
+  revealBtn.style.display='inline-block';
+  promptEl.textContent="What's hiding in the box?";
+  cmdEl.textContent=''; choicesEl.style.display='none'; choicesEl.innerHTML='';
+  ans.textContent=''; hint.textContent=''; brk.textContent='';
+  hearBtn.style.display='none'; didBtn.style.display='none'; nextBtn.style.display='none';
+  document.getElementById('end').textContent='';
+  updateHeader();
+}
+function currentText(){
+  if(mode==="follow") return COMMANDS[decks.follow[idx]][1];
+  if(mode==="show") return "Show me the "+OBJECTS[decks.show[idx]][1]+"!";
+  const b=BODY[decks.body[idx]];
+  return b.kind==="touch" ? b.text : "Which one is the "+b.name.toLowerCase()+"?";
+}
+function reveal(){
+  revealBtn.style.display='none'; boing();
+  const silly=sillyLine();
+  if(mode==="follow"){
+    const [emoji,text]=COMMANDS[decks.follow[idx]];
+    pic.textContent=emoji; promptEl.textContent='Follow it!'; cmdEl.textContent=text;
+    hint.textContent=silly+' Then tap "I did it!"';
+    speak(text); hearBtn.style.display='inline-block'; didBtn.style.display='inline-block';
+  } else if(mode==="show"){
+    const [emoji,name,group]=OBJECTS[decks.show[idx]];
+    pic.textContent='🔍'; promptEl.textContent='Show me the '+name+'!'; cmdEl.textContent='';
+    hint.textContent='Tap the right picture! '+silly;
+    speak('Show me the '+name);
+    const sameGroup=OBJECTS.filter(o=>o[2]===group && o[1]!==name);
+    const others=shuffle([...sameGroup, ...OBJECTS.filter(o=>o[2]!==group && o[1]!==name)]).slice(0,2);
+    const opts=shuffle([[emoji,name], ...others.map(o=>[o[0],o[1]])]);
+    choicesEl.style.display='flex';
+    opts.forEach(o=>{
+      const b=document.createElement('button'); b.className='choice'; b.textContent=o[0]; b.setAttribute('aria-label',o[1]);
+      b.onclick=()=>{ if(answered) return;
+        if(o[1]===name){ answered=true; b.classList.add('correct'); award(name+'! 🎉','That is the '+name.toLowerCase()+'! Great showing!'); }
+        else { b.classList.add('wrong'); streak=0; ans.textContent='Oops! Try again! 💪'; hint.textContent='Look again — show me the '+name+'!'; speak('Try again'); }
+      };
+      choicesEl.appendChild(b);
+    });
+  } else {
+    const b=BODY[decks.body[idx]];
+    if(b.kind==="touch"){
+      pic.textContent=b.emoji; promptEl.textContent='Body Parts!'; cmdEl.textContent=b.text;
+      hint.textContent=silly+' Then tap "I did it!"';
+      speak(b.text); hearBtn.style.display='inline-block'; didBtn.style.display='inline-block';
+    } else {
+      pic.textContent='🧍'; promptEl.textContent='Which one is the '+b.name.toLowerCase()+'?'; cmdEl.textContent='';
+      hint.textContent='Tap the right body part! '+silly;
+      speak('Which one is the '+b.name+'?');
+      const others=shuffle(PARTS.filter(p=>p[1]!==b.name && p[0]!==b.emoji)).slice(0,2);
+      const opts=shuffle([[b.emoji,b.name], ...others]);
+      choicesEl.style.display='flex';
+      opts.forEach(o=>{
+        const btn=document.createElement('button'); btn.className='choice'; btn.textContent=o[0]; btn.setAttribute('aria-label',o[1]);
+        btn.onclick=()=>{ if(answered) return;
+          if(o[1]===b.name){ answered=true; btn.classList.add('correct'); award(b.name+'! 🎉','That is the '+b.name.toLowerCase()+'!'); }
+          else { btn.classList.add('wrong'); streak=0; ans.textContent='Oops! Try again! 💪'; hint.textContent='Look again — which one is the '+b.name.toLowerCase()+'?'; speak('Try again'); }
+        };
+        choicesEl.appendChild(btn);
+      });
+    }
+  }
+}
+function award(answerText, hintText){
+  streak++; ding();
+  if(streak>=3){ brk.innerHTML='🔥 '+streak+' in a row! You are on FIRE! 🔥'; }
+  stars++;
+  if(stars===10){ brk.innerHTML='🌟🌟🌟 10 STARS! You are a SUPERSTAR! 🌟🌟🌟'; }
+  if(stars===25){ brk.innerHTML='🎉🎉 25 STARS! Halfway to LEGEND! 🎉🎉'; }
+  if(stars===50){ brk.innerHTML='🏆🏆 50 STARS! You are a LEGEND! 🏆🏆'; }
+  ans.textContent=answerText; hint.textContent=hintText;
+  speak(answerText);
+  didBtn.style.display='none'; hearBtn.style.display='none';
+  if((stars)%5===0){ brk.innerHTML='🎉 Dance break! 🕺💃 <br>Shake your arms, wiggle, then keep going!'; }
+  nextBtn.style.display='inline-block';
+  document.getElementById('fill').style.width=((idx+1)/deckLen()*100)+'%';
+  updateHeader();
+  if(idx===deckLen()-1){ document.getElementById('end').innerHTML='<div id="confetti">🎉🏆🎉</div>You finished this mode! You are a superstar! Try another mode!'; }
+}
+revealBtn.onclick=reveal;
+hearBtn.onclick=()=>{ speak(currentText()); };
+didBtn.onclick=()=>{ award('You did it! 🎉','Amazing following!'); };
+nextBtn.onclick=()=>{ idx++; if(idx>=deckLen()) idx=0; showRound(); };
+function setMode(m){
+  mode=m; idx=0;
+  document.getElementById('followMode').classList.toggle('on',m==='follow');
+  document.getElementById('showMode').classList.toggle('on',m==='show');
+  document.getElementById('bodyMode').classList.toggle('on',m==='body');
+  showRound();
+}
+document.getElementById('followMode').onclick=()=>setMode('follow');
+document.getElementById('showMode').onclick=()=>setMode('show');
+document.getElementById('bodyMode').onclick=()=>setMode('body');
+document.getElementById('shuffleBtn').onclick=()=>{ decks={follow:shuffle([...COMMANDS.keys()]), show:shuffle([...OBJECTS.keys()]), body:shuffle([...BODY.keys()])}; idx=0; showRound(); };
+document.getElementById('restartBtn').onclick=()=>{ decks={follow:shuffle([...COMMANDS.keys()]), show:shuffle([...OBJECTS.keys()]), body:shuffle([...BODY.keys()])}; idx=0; stars=0; streak=0; showRound(); };
+document.getElementById('soundBtn').onclick=(e)=>{ soundOn=!soundOn; e.target.textContent=soundOn?'🔊 Sound: On':'🔇 Sound: Off'; };
+showRound();
+</script>
+</body>
+</html>
